@@ -1,5 +1,5 @@
 -- Create File Format
-CREATE OR REPLACE FILE FORMAT IF NOT EXISTS complaints_csv_format
+CREATE FILE FORMAT IF NOT EXISTS complaints_csv_format
 TYPE = CSV
 COMPRESSION = 'AUTO'
 FIELD_DELIMITER = ','
