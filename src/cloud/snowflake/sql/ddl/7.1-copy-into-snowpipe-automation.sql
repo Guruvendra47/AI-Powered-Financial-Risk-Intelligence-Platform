@@ -9,10 +9,10 @@
 CREATE PIPE IF NOT EXISTS stock_pipe_customer
 AUTO_INGEST = TRUE 
 AS
-COPY INTO customer_table -- mention table name in which you want to copy the data
-FROM @realtime_stage/customer --stage/s3 bucket folder name
-FILE_FORMAT = complaints_parquet_format
-PATTERN = '.*\\.parquet'
+COPY INTO raw_complaints                 -- mention table name in which you want to copy the data
+FROM @risk_complaints_stage/customer     --stage/s3 bucket folder name
+FILE_FORMAT = complaints_csv_format
+PATTERN = '.*\\.csv'
 MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE;
 
 -- Table 2
