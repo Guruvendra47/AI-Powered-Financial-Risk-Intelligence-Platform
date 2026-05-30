@@ -33,6 +33,7 @@ def main():
             "Consumer complaint narrative"
         ]
     ]
+    df = df.fillna("")
 
     conn = get_connection()
 
