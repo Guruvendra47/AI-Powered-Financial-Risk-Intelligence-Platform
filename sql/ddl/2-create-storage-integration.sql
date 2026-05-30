@@ -3,6 +3,7 @@
 
 --Create IAM Role in AWS
 -- Go to AWS Console → IAM → Roles → Create Role 
+--copy role arn after created then paste role arn to STORAGE_AWS_ROLE_ARN
 
 --Create Storage Integration in Snowflake
 USE DATABASE FINANCIAL_RISK_INTELLIGENCE;
@@ -12,12 +13,11 @@ CREATE STORAGE INTEGRATION risk_s3_int
 TYPE = EXTERNAL_STAGE
 STORAGE_PROVIDER = S3
 ENABLED = TRUE
---create role you get you get role arn----
 STORAGE_AWS_ROLE_ARN = 'arn:aws:iam::058862856404:role/role-financial-risk'
 STORAGE_ALLOWED_LOCATIONS = ('s3://financial-risk-intelligence-platform-dev/');
 
 -- Get Snowflake IAM User ARN
-DESC INTEGRATION S3_INT;
+DESC INTEGRATION risk_s3_int;
 -- Copy STORAGE_AWS_IAM_USER_ARN
 -- Copy STORAGE_AWS_EXTERNAL_ID
 
