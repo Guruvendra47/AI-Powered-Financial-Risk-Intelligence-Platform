@@ -21,3 +21,6 @@ MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE;
 SELECT 
   COUNT(*) 
 FROM raw_complaints;
+
+
+--NOTE:- go to dml (data manipulation language) folder inorder to proceed with next steps
