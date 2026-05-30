@@ -12,7 +12,8 @@ CREATE STORAGE INTEGRATION risk_s3_int
 TYPE = EXTERNAL_STAGE
 STORAGE_PROVIDER = S3
 ENABLED = TRUE
-STORAGE_AWS_ROLE_ARN = '<YOUR_ROLE_ARN>'
+--create role you get you get role arn----
+STORAGE_AWS_ROLE_ARN = 'arn:aws:iam::058862856404:role/role-financial-risk'
 STORAGE_ALLOWED_LOCATIONS = ('s3://financial-risk-intelligence-platform-dev/');
 
 -- Get Snowflake IAM User ARN
