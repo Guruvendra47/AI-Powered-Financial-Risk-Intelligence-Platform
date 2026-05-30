@@ -15,7 +15,7 @@ TYPE = EXTERNAL_STAGE
 STORAGE_PROVIDER = S3
 ENABLED = TRUE
 STORAGE_AWS_ROLE_ARN = 'arn:aws:iam::058862856404:role/role-financial-risk'
-STORAGE_ALLOWED_LOCATIONS = ('s3://financial-risk-intelligence-platform-dev/');
+STORAGE_ALLOWED_LOCATIONS = ('s3://financial-risk-intelligence-platform-dev-guru/');
 
 -- Get Snowflake IAM User ARN
 DESC INTEGRATION risk_s3_int;
