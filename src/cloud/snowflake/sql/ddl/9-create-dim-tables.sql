@@ -9,12 +9,12 @@
 -----------------------------------------------------------------------------
 CREATE OR REPLACE TABLE dim_product AS
 SELECT
-    ROW_NUMBER() OVER (ORDER BY product) AS product_id,
-    product AS product_name
+    ROW_NUMBER() OVER (ORDER BY PRODUCT) AS product_id,
+    PRODUCT AS product_name
 FROM (
-    SELECT DISTINCT product
-    FROM complaints_raw
-    WHERE product IS NOT NULL
+    SELECT DISTINCT PRODUCT
+    FROM COMPLAINTS
+    WHERE PRODUCT IS NOT NULL
 );
 
 ----------------------------------------------------------------------------
@@ -22,12 +22,12 @@ FROM (
 ----------------------------------------------------------------------------
 CREATE OR REPLACE TABLE dim_company AS
 SELECT
-    ROW_NUMBER() OVER (ORDER BY company) AS company_id,
-    company AS company_name
+    ROW_NUMBER() OVER (ORDER BY COMPANY) AS company_id,
+    COMPANY AS company_name
 FROM (
-    SELECT DISTINCT company
-    FROM complaints_raw
-    WHERE company IS NOT NULL
+    SELECT DISTINCT COMPANY
+    FROM COMPLAINTS
+    WHERE COMPANY IS NOT NULL
 );
 
 ------------------------------------------------------------------------------
@@ -35,12 +35,12 @@ FROM (
 ------------------------------------------------------------------------------
 CREATE OR REPLACE TABLE dim_location AS
 SELECT
-    ROW_NUMBER() OVER (ORDER BY state) AS location_id,
-    state AS state_code
+    ROW_NUMBER() OVER (ORDER BY STATE) AS location_id,
+    STATE AS state_code
 FROM (
-    SELECT DISTINCT state
-    FROM complaints_raw
-    WHERE state IS NOT NULL
+    SELECT DISTINCT STATE
+    FROM COMPLAINTS
+    WHERE STATE IS NOT NULL
 );
 
 -------------------------------------------------------------------------------
@@ -48,12 +48,12 @@ FROM (
 -------------------------------------------------------------------------------
 CREATE OR REPLACE TABLE dim_channel AS
 SELECT
-    ROW_NUMBER() OVER (ORDER BY submitted_via) AS channel_id,
-    submitted_via AS channel_name
+    ROW_NUMBER() OVER (ORDER BY SUBMITTED_VIA) AS channel_id,
+    SUBMITTED_VIA AS channel_name
 FROM (
-    SELECT DISTINCT submitted_via
-    FROM complaints_raw
-    WHERE submitted_via IS NOT NULL
+    SELECT DISTINCT SUBMITTED_VIA
+    FROM COMPLAINTS
+    WHERE SUBMITTED_VIA IS NOT NULL
 );
 
 
