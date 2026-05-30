@@ -16,11 +16,23 @@ def create_vector_store():
         model="text-embedding-3-small"
     )
 
-    vector_store = Chroma.from_documents(
-        documents=chunks,
-        embedding=embeddings,
-        persist_directory="vector_store/chroma_db"
+    vector_store = Chroma(
+        persist_directory="vector_store/chroma_db",
+        embedding_function=embeddings
     )
+
+    batch_size = 50
+
+    for i in range(0, len(chunks), batch_size):
+
+        batch = chunks[i:i + batch_size]
+
+        vector_store.add_documents(batch)
+
+        print(
+            f"Processed Batch "
+            f"{i // batch_size + 1}"
+        )
 
     print(
         f"Vector Store Created: {len(chunks)} chunks"
