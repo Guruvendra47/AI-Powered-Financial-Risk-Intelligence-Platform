@@ -10,9 +10,17 @@ def main():
         end_date="2025-01-31"
     )
 
+    print("\nFirst 5 Records:\n")
+
     print(df.head())
 
-    print(f"\nRecords Retrieved: {len(df)}")
+    print(
+        f"\nTotal Records Retrieved: {len(df):,}"
+    )
+
+    print(
+        f"Total Columns: {len(df.columns)}"
+    )
 
 
 if __name__ == "__main__":
