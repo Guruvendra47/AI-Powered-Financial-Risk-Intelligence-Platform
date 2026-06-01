@@ -29,3 +29,16 @@ The framework uses `python-dotenv` to decouple application logic from infrastruc
    In the root directory of the project, duplicate the template file to create your active environment variables:
    ```bash
    cp .env.example .env
+
+2. **Populate the Credentials:**
+Open the `.env` file in your root directory and replace the placeholder tokens with your active cloud infrastructure credentials.
+
+3. **Importing Configuration in Code:**
+Instead of calling `os.getenv()` multiple times across different modules, always import variables directly from the unified configuration module. This ensures consistency and prevents runtime `NoneType` errors across the application:
+
+```python
+from src.config import settings
+
+# Example usage within the S3 upload module
+print(f"Targeting S3 Landing Zone Bucket: {settings.AWS_BUCKET_NAME}")
+
