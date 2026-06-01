@@ -78,7 +78,7 @@ def validate_dataframe(df):
     # Duplicate Check
     # ----------------------------
 
-   duplicate_count = (
+    duplicate_count = (
     df["Complaint ID"]
     .duplicated()
     .sum()
