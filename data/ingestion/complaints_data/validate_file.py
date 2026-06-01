@@ -8,7 +8,8 @@ REQUIRED_COLUMNS = [
     "Complaint ID",
     "Date received",
     "Product",
-    "Company"
+    "Company",
+    "Consumer complaint narrative"
 ]
 
 
@@ -77,7 +78,11 @@ def validate_dataframe(df):
     # Duplicate Check
     # ----------------------------
 
-    duplicate_count = df.duplicated().sum()
+   duplicate_count = (
+    df["Complaint ID"]
+    .duplicated()
+    .sum()
+   )
 
     logger.info(
         f"Duplicate Records Found: "
