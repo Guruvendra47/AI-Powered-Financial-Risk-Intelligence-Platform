@@ -10,6 +10,10 @@ def main():
         end_date="2025-01-31"
     )
 
+    print("\nColumns Returned:\n")
+
+    print(df.columns.tolist())
+
     print("\nFirst 5 Records:\n")
 
     print(df.head())
