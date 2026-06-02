@@ -2,40 +2,41 @@ from pathlib import Path
 
 from langchain_community.document_loaders import PyPDFLoader
 
+from src.utils.logger import get_logger
+
+logger = get_logger(__name__)
+
+
 def load_documents():
 
-    document_paths = []
-
-    folders = [
-        "data/documents/regulations",
-        "data/documents/compliance",
-        "data/documents/risk_reports"
+    document_folders = [
+        "data/ai_documents/regulations",
+        "data/ai_documents/compliance",
+        "data/ai_documents/risk_reports"
     ]
-
-    for folder in folders:
-
-        pdf_files = Path(folder).glob("*.pdf")
-
-        for file in pdf_files:
-            document_paths.append(str(file))
 
     documents = []
 
-    for pdf_file in document_paths:
+    for folder in document_folders:
 
-        loader = PyPDFLoader(pdf_file)
+        pdf_files = Path(folder).glob("*.pdf")
 
-        documents.extend(
-            loader.load()
-        )
+        for pdf_file in pdf_files:
+
+            logger.info(
+                f"Loading document: {pdf_file}"
+            )
+
+            loader = PyPDFLoader(
+                str(pdf_file)
+            )
+
+            documents.extend(
+                loader.load()
+            )
+
+    logger.info(
+        f"Total documents loaded: {len(documents)}"
+    )
 
     return documents
-
-
-if __name__ == "__main__":
-
-    docs = load_documents()
-
-    print(
-        f"Documents Loaded: {len(docs)}"
-    )
