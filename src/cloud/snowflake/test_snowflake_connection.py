@@ -1,4 +1,4 @@
-from src.cloud.snowflake.check_snflake_connected import get_connection
+from src.cloud.snowflake.snowflake_connection import get_connection
 
 def main():
 
