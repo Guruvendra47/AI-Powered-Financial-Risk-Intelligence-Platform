@@ -15,7 +15,7 @@ def main():
     )
 
     print(
-        f"\nRetrieved Chunks: {len(results)}\n"
+        f"\nRetrieved Chunks: {len(results)}"
     )
 
     for i, doc in enumerate(
@@ -24,7 +24,7 @@ def main():
     ):
 
         print(
-            f"\n----- Result {i} -----\n"
+            f"\n========== Result {i} ==========\n"
         )
 
         print(
