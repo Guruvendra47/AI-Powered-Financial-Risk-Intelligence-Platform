@@ -1,74 +1,48 @@
 from dotenv import load_dotenv
 
 from langchain_openai import ChatOpenAI
-from langchain_openai import OpenAIEmbeddings
+from langchain.prompts import ChatPromptTemplate
+from langchain.chains import RetrievalQA
 
-from langchain_chroma import Chroma
+from src.rag.retriever import get_retriever
 
 load_dotenv()
 
 
-def ask_question(question):
+def build_rag_chain():
 
-    embeddings = OpenAIEmbeddings(
-        model="text-embedding-3-small"
-    )
-
-    vector_store = Chroma(
-        persist_directory="vector_store/chroma_db",
-        embedding_function=embeddings
-    )
-
-    docs = vector_store.similarity_search(
-        question,
-        k=3
-    )
-
-    context = "\n\n".join(
-        [doc.page_content for doc in docs]
-    )
+    retriever = get_retriever()
 
     llm = ChatOpenAI(
-        model="gpt-4o-mini",
+        model="gpt-4.1-mini",
         temperature=0
     )
 
-    prompt = f"""
-You are a financial compliance and risk analyst.
+    prompt = ChatPromptTemplate.from_template(
+        """
+You are a financial risk and compliance assistant.
 
-Use the provided context to answer
-the question.
+Answer the question using ONLY the provided context.
+
+If the answer cannot be found in the context, say:
+
+'I could not find that information in the document repository.'
 
 Context:
 {context}
 
 Question:
 {question}
-
-Provide:
-
-1. Summary
-2. Compliance Insight
-3. Risk Assessment
-4. Recommendation
 """
-
-    response = llm.invoke(prompt)
-
-    return response.content
-
-
-if __name__ == "__main__":
-
-    question = (
-        "What are the major compliance risks "
-        "for financial institutions?"
     )
 
-    answer = ask_question(question)
+    qa_chain = RetrievalQA.from_chain_type(
+        llm=llm,
+        retriever=retriever,
+        chain_type="stuff",
+        chain_type_kwargs={
+            "prompt": prompt
+        }
+    )
 
-    print("\nQUESTION:\n")
-    print(question)
-
-    print("\nANSWER:\n")
-    print(answer)
+    return qa_chain
