@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from langchain_openai import OpenAIEmbeddings
 from langchain_chroma import Chroma
 
-from src.utils.logger import get_logger
+from src.ingestion.utils.logger import get_logger
 
 load_dotenv()
 
