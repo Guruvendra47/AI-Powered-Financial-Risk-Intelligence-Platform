@@ -115,3 +115,4 @@ services:
       AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-api-server:8080/execution/
       PYTHONPATH: /opt/project
     command: airflow scheduler
+  
