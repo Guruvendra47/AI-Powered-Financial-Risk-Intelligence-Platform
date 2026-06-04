@@ -48,16 +48,14 @@ services:
         condition: service_completed_successfully
     ports:
       - "8080:8080"
-    # Automatically pulls ALL variables (Snowflake & OpenAI) from project root .env
     env_file:
-      - ../.env
+      - ../.env # Seamlessly feeds Snowflake/OpenAI secrets to the API panel
     volumes:
       - ../:/opt/project
       - ./airflow/dags:/opt/airflow/dags
       - ./airflow/logs:/opt/airflow/logs
       - ./airflow/plugins:/opt/airflow/plugins
     environment:
-      # Core Airflow Settings
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
       AIRFLOW__API_AUTH__JWT_SECRET: "my-secret-key"
@@ -66,30 +64,25 @@ services:
     command: airflow api-server
 
   # =========================================================================
-  # 4. AIRFLOW JOB SCHEDULER & RUNTIME EXECUTOR
+  # 4. AIRFLOW DAG PROCESSOR (Isolated Parsing Daemon)
   # =========================================================================
-  airflow-scheduler:
+  airflow-dag-processor:
     build:
       context: ..
-      dockerfile: docker/Dockerfile
-    container_name: airflow-scheduler
+      dockerfile: docker/Dockerfile # Builds your custom AI + dbt libraries
+    container_name: airflow-dag-processor
     depends_on:
       airflow-init:
         condition: service_completed_successfully
-    # Automatically pulls ALL variables (Snowflake & OpenAI) from project root .env
     env_file:
-      - ../.env
+      - ../.env # Injects credentials so it can compile your dbt-dependent paths safely
     volumes:
       - ../:/opt/project
       - ./airflow/dags:/opt/airflow/dags
       - ./airflow/logs:/opt/airflow/logs
       - ./airflow/plugins:/opt/airflow/plugins
     environment:
-      # Core Airflow Settings
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
       AIRFLOW__API_AUTH__JWT_SECRET: "my-secret-key"
-      AIRFLOW_SIMPLE_AUTH_MANAGER_USERS: "admin:admin"
-      AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-api-server:8080/execution/
-      PYTHONPATH: /opt/project
-    command: airflow scheduler
+      AIRFLOW_SIMPLE_AUTH_MANAGER_USERS: "admin
