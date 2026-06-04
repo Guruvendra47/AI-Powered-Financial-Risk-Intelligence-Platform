@@ -1,150 +1,310 @@
-# Financial Risk Data Transformation Engine (`dbt`)
+# dbt Analytics Engineering Layer
 
-This subdirectory contains the core **dbt (Data Build Tool)** project for the **AI-Powered-Financial-Risk-Intelligence-Platform**. It manages the ELT (Extract-Load-Transform) pipeline layers inside **Snowflake**, transforming raw Consumer Financial Protection Bureau (CFPB) complaints into structured, clean analytical data marts optimized for downstream GenAI processing and Power BI dashboards.
+## Overview
 
----
+This folder contains the dbt project responsible for transforming raw financial complaint data stored in Snowflake into analytics-ready datasets used by Power BI dashboards and AI-driven risk intelligence workflows.
 
-## 🏗️ Data Architecture Layers
-
-Transformations inside Snowflake are strictly decoupled into modular logical layers within the `models/` directory:
-
-* **`models/staging/`**: Light validation, casting, and standardizing of column naming conventions directly over raw landing tables.
-* **`models/marts/`**: Dense business logic, computing risk aggregates, customer sentiment indicators, and combining datasets into final dimensions and facts.
-* **`seeds/`**: Static lookup maps (e.g., state codes, company sectors, risk priority thresholds).
-* **`tests/`**: Automated schema tests ensuring primary keys are `unique` and non-null (`not_null`), alongside custom relational integrity validation.
+The dbt layer follows a modern Medallion Architecture approach by implementing Silver and Gold transformation layers.
 
 ---
 
-## ⚙️ Configuration & Prerequisites
+# Architecture
 
-Before running this project locally or via orchestration, ensure your environment is properly configured.
-
-### 1. Profile Setup (`profiles.yml`)
-Your profile tells dbt how to securely authenticate with your Snowflake Warehouse. Ensure your local `~/.dbt/profiles.yml` or the project-level `profiles.yml` is structured like this:
-
-```yaml
-financial_risk_profile:
-  target: dev
-  outputs:
-    dev:
-      type: snowflake
-      account: <your_snowflake_account_locator>
-      user: <your_username>
-      password: <your_password>
-      role: <your_functional_role>
-      database: AIRFLOW_DB
-      warehouse: COMPUTE_WH
-      schema: TRANSFORMS
-      threads: 4
-
+```text
+RAW Layer
+RAW.RAW_COMPLAINTS
+        │
+        ▼
+Silver Layer
+ANALYTICS_SILVER.STG_COMPLAINTS
+        │
+        ▼
+Gold Layer
+DIM_COMPANY
+DIM_LOCATION
+DIM_PRODUCT
+DIM_CHANNEL
+FACT_COMPLAINTS
 ```
 
 ---
 
-## 🚀 Step-by-Step Execution Guide
+# Project Structure
 
-Follow these steps in order to run and test your dbt transformations locally or within your development terminal. Always ensure you are inside the `dbt_AI_financial_risk_project` directory before running these commands.
+```text
+dbt
+│
+├── models
+│   ├── silver
+│   │   └── stg_complaints.sql
+│   │
+│   └── gold
+│       ├── dim_company.sql
+│       ├── dim_location.sql
+│       ├── dim_product.sql
+│       ├── dim_channel.sql
+│       └── fact_complaints.sql
+│
+├── dbt_project.yml
+├── profiles.yml
+└── README.md
+```
 
-### Step 1: Install Project Dependencies
+---
 
-Fetch external dbt package dependencies (such as `dbt_utils`) declared in your `packages.yml`:
+# Silver Layer
+
+## stg_complaints
+
+Materialization:
+
+```sql
+incremental
+```
+
+Source Table:
+
+```text
+FINANCIAL_RISK_INTELLIGENCE.RAW.RAW_COMPLAINTS
+```
+
+Target Table:
+
+```text
+FINANCIAL_RISK_INTELLIGENCE.ANALYTICS_SILVER.STG_COMPLAINTS
+```
+
+Responsibilities:
+
+* Data cleaning
+* Data standardization
+* Duplicate removal
+* Null handling
+* Data type conversion
+* Incremental processing
+
+Transformations:
+
+* Convert complaint identifiers to numeric format
+* Standardize date fields
+* Trim unnecessary whitespace
+* Normalize company names
+* Remove duplicate complaints
+* Validate required business fields
+
+---
+
+# Gold Layer
+
+The Gold Layer contains dimensional models optimized for reporting and analytics.
+
+---
+
+## DIM_COMPANY
+
+Purpose:
+
+Stores unique company information.
+
+Example:
+
+```text
+Bank of America
+Capital One
+Wells Fargo
+Citibank
+```
+
+Business Value:
+
+Supports complaint analysis by company.
+
+---
+
+## DIM_LOCATION
+
+Purpose:
+
+Stores geographical attributes.
+
+Example:
+
+```text
+State
+Zip Code
+```
+
+Business Value:
+
+Supports regional complaint trend analysis.
+
+---
+
+## DIM_PRODUCT
+
+Purpose:
+
+Stores financial product categories.
+
+Example:
+
+```text
+Credit Card
+Mortgage
+Student Loan
+Checking Account
+```
+
+Business Value:
+
+Identifies products generating the highest complaint volumes.
+
+---
+
+## DIM_CHANNEL
+
+Purpose:
+
+Stores complaint submission channels.
+
+Example:
+
+```text
+Web
+Phone
+Email
+Referral
+```
+
+Business Value:
+
+Analyzes customer engagement and complaint submission behavior.
+
+---
+
+## FACT_COMPLAINTS
+
+Purpose:
+
+Central analytical fact table.
+
+Contains:
+
+* Complaint records
+* Company relationships
+* Product relationships
+* Geographic relationships
+* Submission channel relationships
+
+Business Value:
+
+Provides the primary reporting table used by Power BI.
+
+---
+
+# Star Schema
+
+```text
+                DIM_COMPANY
+                      |
+                      |
+DIM_PRODUCT ---- FACT_COMPLAINTS ---- DIM_LOCATION
+                      |
+                      |
+                DIM_CHANNEL
+```
+
+Benefits:
+
+* Simplified analytics
+* Improved reporting performance
+* Optimized Power BI queries
+* Enterprise reporting standards
+
+---
+
+# Running dbt
+
+## Validate Configuration
 
 ```bash
-dbt deps
-
+dbt debug --profiles-dir .
 ```
 
-### Step 2: Load Static Seed Data
+---
 
-Load csv data files located in your `seeds/` folder straight into Snowflake as static lookup tables:
-
-```bash
-dbt seed --profiles-dir .
-
-```
-
-### Step 3: Run Transformations (The Entire Project)
-
-Compile all SQL models and materialize tables/views into Snowflake:
+## Execute Models
 
 ```bash
 dbt run --profiles-dir .
-
-```
-
-### Step 4: Running Specific SQL Files (Models)
-
-Instead of running the entire project, you can isolate specific SQL files using the `--select` (or `-s`) flag. **Do not include the `.sql` extension when selecting models.**
-
-* **Run a single specific SQL file:**
-```bash
-dbt run --select stg_complaints --profiles-dir .
-
-```
-
-
-* **Run a model and everything after it (Downstream):**
-If you modified a staging file and want to rebuild it *and* any mart tables that depend on it, add a `+` to the **end**:
-```bash
-dbt run --select stg_complaints+ --profiles-dir .
-
-```
-
-
-* **Run a model and everything before it (Upstream):**
-If you want to run a final mart table but need to ensure all its underlying staging views are refreshed first, add a `+` to the **beginning**:
-```bash
-dbt run --select +fct_financial_risk --profiles-dir .
-
-```
-
-
-* **Run an entire directory of SQL files:**
-To execute every single SQL file inside a specific folder (e.g., the staging folder):
-```bash
-dbt run --select staging --profiles-dir .
-
-```
-
-
-
-### Step 5: Execute Data Quality Tests
-
-Run data assertions and semantic constraints to catch schema anomalies:
-
-```bash
-dbt test --profiles-dir .
-
-```
-
-### Step 6: Generate Lineage Graph & Documentation
-
-Generate and host a local interactive visualization map of your model dependency graph:
-
-```bash
-dbt docs generate && dbt docs serve
-
 ```
 
 ---
 
-## 🤖 Airflow Orchestration Context
+## Run Tests
 
-Within the broader platform, this dbt project is triggered automatically via Apache Airflow inside the Docker container layout. Airflow orchestrates the **entire project** as a single task using the `BashOperator`, allowing dbt's internal graph resolver to handle individual file dependencies:
-
-```python
-dbt_run_task = BashOperator(
-    task_id="dbt_run",
-    bash_command="""
-    cd /opt/project/dbt_AI_financial_risk_project &&
-    dbt run --profiles-dir .
-    """
-)
-
+```bash
+dbt test --profiles-dir .
 ```
 
-> ⚠️ **Maintenance Note:** When adding new raw source data tables to your pipeline, remember to declare them in your configuration schemas inside `models/staging/schema.yml` before writing your staging `.sql` files to prevent compilation errors during production runs.
+---
 
+## Generate Documentation
+
+```bash
+dbt docs generate
 ```
 
+---
+
+# Snowflake Integration
+
+dbt connects to Snowflake using environment variables configured in:
+
+```text
+profiles.yml
+```
+
+Key Variables:
+
+```text
+SNOWFLAKE_ACCOUNT
+SNOWFLAKE_USER
+SNOWFLAKE_PASSWORD
+SNOWFLAKE_ROLE
+SNOWFLAKE_WAREHOUSE
+SNOWFLAKE_DATABASE
+SNOWFLAKE_SCHEMA
+```
+
+---
+
+# Business Impact
+
+The dbt layer transforms raw complaint data into analytics-ready datasets that support:
+
+* Financial risk monitoring
+* Complaint trend analysis
+* Product performance analysis
+* Company benchmarking
+* Geographic complaint insights
+* Power BI dashboards
+* AI-powered risk intelligence workflows
+
+---
+
+# Key Skills Demonstrated
+
+* dbt
+* Snowflake
+* SQL
+* Data Modeling
+* Incremental Models
+* Dimensional Modeling
+* Star Schema Design
+* Analytics Engineering
+* ELT Pipelines
+* Business Intelligence
+
+```
 ```
